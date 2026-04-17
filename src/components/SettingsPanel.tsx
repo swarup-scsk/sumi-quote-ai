@@ -106,30 +106,44 @@ export function SettingsPanel() {
           </p>
         )}
 
-        <div className="mt-5 flex items-start justify-between rounded-lg border border-border bg-surface p-3">
-          <div>
-            <p className="text-sm font-medium text-ink">Demo Mode</p>
-            <p className="text-xs text-mid">
-              When ON, all API calls return mock data (DC04 / SCE Prague scenario).
-            </p>
+        <fieldset className="mt-5 rounded-lg border border-border bg-surface p-3">
+          <legend className="px-1 text-sm font-medium text-ink">Demo Mode</legend>
+          <p className="mb-2 text-xs text-mid">
+            When ON, all API calls return mock data (DC04 / SCE Prague scenario).
+          </p>
+          <div className="flex gap-4">
+            {[
+              { value: true, label: "On" },
+              { value: false, label: "Off" },
+            ].map((opt) => {
+              const active = draft.demo_mode === opt.value;
+              return (
+                <label
+                  key={opt.label}
+                  className="inline-flex cursor-pointer items-center gap-2 text-sm text-ink"
+                >
+                  <input
+                    type="radio"
+                    name="demo_mode"
+                    checked={active}
+                    onChange={() => update({ demo_mode: opt.value })}
+                    className="sr-only"
+                  />
+                  <span
+                    className={`flex h-4 w-4 items-center justify-center rounded-full border-2 ${
+                      active ? "border-brand" : "border-mid"
+                    }`}
+                  >
+                    {active && <span className="h-2 w-2 rounded-full bg-brand" />}
+                  </span>
+                  {opt.label}
+                </label>
+              );
+            })}
           </div>
-          <button
-            type="button"
-            role="switch"
-            aria-checked={draft.demo_mode}
-            onClick={() => update({ demo_mode: !draft.demo_mode })}
-            className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors ${
-              draft.demo_mode ? "bg-brand" : "bg-border"
-            }`}
-          >
-            <span
-              className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform ${
-                draft.demo_mode ? "translate-x-5" : "translate-x-0.5"
-              }`}
-            />
-          </button>
-        </div>
+        </fieldset>
       </section>
+
 
       {/* SECTION 2 — Thresholds */}
       <section className="rounded-xl border border-border bg-white p-6 shadow-sm">
