@@ -160,4 +160,17 @@
     background-color: var(--color-background);
     color: var(--color-foreground);
   }
+
+  /* Brand-teal focus ring on every interactive element by default */
+  a:focus-visible,
+  button:focus-visible,
+  [role="button"]:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible,
+  [tabindex]:focus-visible {
+    outline: 2px solid var(--brand);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
 }

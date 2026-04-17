@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Loader2, Inbox } from "lucide-react";
 import type { RFQInboxItem } from "@/types";
+import { getConfidenceColor } from "@/lib/confidence";
 
 function StatusBadge({ status }: { status: RFQInboxItem["status"] }) {
   const map: Record<RFQInboxItem["status"], { label: string; cls: string; spin?: boolean }> = {
@@ -24,11 +25,10 @@ function StatusBadge({ status }: { status: RFQInboxItem["status"] }) {
 
 function ConfidencePill({ value }: { value: number }) {
   const pct = Math.round(value * 100);
-  let cls = "bg-coral/15 text-coral";
-  if (pct >= 80) cls = "bg-emerald-100 text-emerald-700";
-  else if (pct >= 40) cls = "bg-amber/15 text-amber";
   return (
-    <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${cls}`}>
+    <span
+      className={`rounded-full bg-surface px-2 py-0.5 text-[11px] font-semibold ${getConfidenceColor(value)}`}
+    >
       {pct}%
     </span>
   );

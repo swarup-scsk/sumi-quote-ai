@@ -1,6 +1,6 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, type FormEvent } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { ArrowLeft, AlertTriangle, ChevronDown, X, Plus, Loader2 } from "lucide-react";
+import { ArrowLeft, AlertTriangle, ChevronDown, X, Plus } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import type { ConfirmedSpec, FieldStatus, SpecCard, CustomerTier } from "@/types";
 import { generateQuote, logAuditEvent } from "@/lib/api";
@@ -8,6 +8,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import { LoadingOverlay } from "@/components/LoadingOverlay";
+import { ErrorAlert } from "@/components/ErrorAlert";
+import { getConfidenceColor } from "@/lib/confidence";
 
 interface Props {
   rfqId: string;
@@ -35,12 +38,6 @@ const FIELD_DEFS: { key: FieldKey; label: string; type: "text" | "number"; confi
   { key: "surface_finish", label: "Surface Finish", type: "text", confidenceKey: "surface_finish_confidence" },
   { key: "delivery_format", label: "Delivery Format", type: "text", confidenceKey: "delivery_format_confidence" },
 ];
-
-function confidenceColor(pct: number) {
-  if (pct >= 80) return "text-brand";
-  if (pct >= 40) return "text-amber";
-  return "text-coral";
-}
 
 function dotColor(status: FieldStatus) {
   if (status === "auto") return "bg-brand";
@@ -192,7 +189,13 @@ export function SpecCardReview({ rfqId }: Props) {
 
   return (
     <TooltipProvider>
-      <div className="pb-28">
+      <form
+        className="pb-28 px-4 md:px-6 pt-4"
+        onSubmit={(e: FormEvent) => {
+          e.preventDefault();
+          if (!submitting && blankFields.length === 0) handleConfirm();
+        }}
+      >
         {/* Header bar */}
         <div className="mb-6">
           <Link to="/" className="inline-flex items-center gap-1.5 text-sm text-mid hover:text-brand mb-3">
@@ -249,7 +252,7 @@ export function SpecCardReview({ rfqId }: Props) {
                   <label className="text-sm font-medium text-ink">{f.label}</label>
                   <div className="flex items-center gap-1.5 text-xs">
                     <span className={cn("size-2 rounded-full", dotColor(status))} />
-                    <span className={cn("font-medium", confidenceColor(pct))}>
+                    <span className={cn("font-medium", getConfidenceColor(pct / 100))}>
                       {status === "blank"
                         ? "Required — not found"
                         : status === "auto"
@@ -282,7 +285,7 @@ export function SpecCardReview({ rfqId }: Props) {
               <label className="text-sm font-medium text-ink">Processing Requirements</label>
               <div className="flex items-center gap-1.5 text-xs">
                 <span className={cn("size-2 rounded-full", dotColor(fieldStatus.processing_requirements ?? "blank"))} />
-                <span className={cn("font-medium", confidenceColor(Math.round(spec.processing_confidence * 100)))}>
+                <span className={cn("font-medium", getConfidenceColor(spec.processing_confidence))}>
                   {Math.round(spec.processing_confidence * 100)}%
                 </span>
               </div>
@@ -373,41 +376,35 @@ export function SpecCardReview({ rfqId }: Props) {
         )}
 
         {error && (
-          <div className="mt-6 rounded-lg border border-coral bg-coral/5 p-3 text-sm text-coral">
-            {error}
+          <div className="mt-6">
+            <ErrorAlert message={error} onRetry={() => handleConfirm()} />
           </div>
         )}
 
         {/* Sticky action bar */}
-        <div className="fixed bottom-0 left-16 right-0 border-t bg-background/95 backdrop-blur px-6 py-3 z-10">
-          <div className="flex items-center justify-between gap-4 max-w-screen-2xl mx-auto">
+        <div className="fixed bottom-16 md:bottom-0 left-0 md:left-16 right-0 border-t bg-background/95 backdrop-blur px-4 md:px-6 py-3 z-10">
+          <div className="flex flex-wrap items-center justify-between gap-3 max-w-screen-2xl mx-auto">
             <div className="flex items-center gap-2">
               <label className="text-sm text-mid">Rep:</label>
               <Input
                 value={repName}
                 onChange={(e) => setRepName(e.target.value)}
-                className="h-8 w-48"
+                className="h-8 w-40 sm:w-48"
               />
             </div>
             <div className="flex items-center gap-3">
-              <Button variant="outline" disabled={submitting}>
+              <Button type="button" variant="outline" disabled={submitting}>
                 Save Draft
               </Button>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <span tabIndex={0}>
+                  <span tabIndex={-1}>
                     <Button
-                      onClick={handleConfirm}
+                      type="submit"
                       disabled={blankFields.length > 0 || submitting}
                       className="bg-brand hover:bg-brand-dark text-white"
                     >
-                      {submitting ? (
-                        <>
-                          <Loader2 className="size-4 animate-spin" /> Generating quote...
-                        </>
-                      ) : (
-                        "Confirm & Generate Quote"
-                      )}
+                      Confirm & Generate Quote
                     </Button>
                   </span>
                 </TooltipTrigger>
@@ -418,7 +415,8 @@ export function SpecCardReview({ rfqId }: Props) {
             </div>
           </div>
         </div>
-      </div>
+      </form>
+      {submitting && <LoadingOverlay message="Generating quote…" />}
     </TooltipProvider>
   );
 }
