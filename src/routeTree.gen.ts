@@ -11,6 +11,8 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as RfqIndexRouteImport } from './routes/rfq.index'
+import { Route as QuoteIndexRouteImport } from './routes/quote.index'
 import { Route as RfqIdRouteImport } from './routes/rfq.$id'
 import { Route as QuoteIdRouteImport } from './routes/quote.$id'
 
@@ -22,6 +24,16 @@ const SettingsRoute = SettingsRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RfqIndexRoute = RfqIndexRouteImport.update({
+  id: '/rfq/',
+  path: '/rfq/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const QuoteIndexRoute = QuoteIndexRouteImport.update({
+  id: '/quote/',
+  path: '/quote/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RfqIdRoute = RfqIdRouteImport.update({
@@ -40,12 +52,16 @@ export interface FileRoutesByFullPath {
   '/settings': typeof SettingsRoute
   '/quote/$id': typeof QuoteIdRoute
   '/rfq/$id': typeof RfqIdRoute
+  '/quote/': typeof QuoteIndexRoute
+  '/rfq/': typeof RfqIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/settings': typeof SettingsRoute
   '/quote/$id': typeof QuoteIdRoute
   '/rfq/$id': typeof RfqIdRoute
+  '/quote': typeof QuoteIndexRoute
+  '/rfq': typeof RfqIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -53,13 +69,22 @@ export interface FileRoutesById {
   '/settings': typeof SettingsRoute
   '/quote/$id': typeof QuoteIdRoute
   '/rfq/$id': typeof RfqIdRoute
+  '/quote/': typeof QuoteIndexRoute
+  '/rfq/': typeof RfqIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/settings' | '/quote/$id' | '/rfq/$id'
+  fullPaths: '/' | '/settings' | '/quote/$id' | '/rfq/$id' | '/quote/' | '/rfq/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/settings' | '/quote/$id' | '/rfq/$id'
-  id: '__root__' | '/' | '/settings' | '/quote/$id' | '/rfq/$id'
+  to: '/' | '/settings' | '/quote/$id' | '/rfq/$id' | '/quote' | '/rfq'
+  id:
+    | '__root__'
+    | '/'
+    | '/settings'
+    | '/quote/$id'
+    | '/rfq/$id'
+    | '/quote/'
+    | '/rfq/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -67,6 +92,8 @@ export interface RootRouteChildren {
   SettingsRoute: typeof SettingsRoute
   QuoteIdRoute: typeof QuoteIdRoute
   RfqIdRoute: typeof RfqIdRoute
+  QuoteIndexRoute: typeof QuoteIndexRoute
+  RfqIndexRoute: typeof RfqIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -83,6 +110,20 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/rfq/': {
+      id: '/rfq/'
+      path: '/rfq'
+      fullPath: '/rfq/'
+      preLoaderRoute: typeof RfqIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/quote/': {
+      id: '/quote/'
+      path: '/quote'
+      fullPath: '/quote/'
+      preLoaderRoute: typeof QuoteIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/rfq/$id': {
@@ -107,6 +148,8 @@ const rootRouteChildren: RootRouteChildren = {
   SettingsRoute: SettingsRoute,
   QuoteIdRoute: QuoteIdRoute,
   RfqIdRoute: RfqIdRoute,
+  QuoteIndexRoute: QuoteIndexRoute,
+  RfqIndexRoute: RfqIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
