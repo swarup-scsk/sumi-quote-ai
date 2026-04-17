@@ -1,6 +1,6 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, type FormEvent } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { ArrowLeft, AlertTriangle, ChevronDown, X, Plus, Loader2 } from "lucide-react";
+import { ArrowLeft, AlertTriangle, ChevronDown, X, Plus } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import type { ConfirmedSpec, FieldStatus, SpecCard, CustomerTier } from "@/types";
 import { generateQuote, logAuditEvent } from "@/lib/api";
@@ -8,6 +8,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import { LoadingOverlay } from "@/components/LoadingOverlay";
+import { ErrorAlert } from "@/components/ErrorAlert";
+import { getConfidenceColor } from "@/lib/confidence";
 
 interface Props {
   rfqId: string;

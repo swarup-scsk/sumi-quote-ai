@@ -1,10 +1,12 @@
 import { useRef, useState, type DragEvent, type FormEvent } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { Upload, FileText, Loader2, X } from "lucide-react";
+import { Upload, FileText, X } from "lucide-react";
 import { z } from "zod";
 import { useApp } from "@/context/AppContext";
 import { submitRFQ } from "@/lib/api";
 import type { RFQInboxItem } from "@/types";
+import { LoadingOverlay } from "@/components/LoadingOverlay";
+import { ErrorAlert } from "@/components/ErrorAlert";
 
 const formSchema = z.object({
   customer_name: z
@@ -225,23 +227,18 @@ export function RFQUpload() {
             disabled={submitting}
             className="mt-1 inline-flex items-center justify-center gap-2 rounded-md bg-brand px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-dark disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {submitting ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Extracting spec with AI…
-              </>
-            ) : (
-              "Submit RFQ"
-            )}
+            Submit RFQ
           </button>
 
           {error && (
-            <div className="rounded-md border border-coral/30 bg-coral/10 px-3 py-2 text-xs text-coral">
-              {error}
-            </div>
+            <ErrorAlert
+              message={error}
+              onRetry={() => onSubmit({ preventDefault: () => {} } as FormEvent)}
+            />
           )}
         </div>
       </div>
+      {submitting && <LoadingOverlay message="Extracting spec with AI…" />}
     </form>
   );
 }
