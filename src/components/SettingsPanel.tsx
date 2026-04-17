@@ -126,7 +126,11 @@ export function SettingsPanel() {
                     type="radio"
                     name="demo_mode"
                     checked={active}
-                    onChange={() => update({ demo_mode: opt.value })}
+                    onChange={() => {
+                      const next = { ...draft, demo_mode: opt.value };
+                      setDraft(next);
+                      dispatch({ type: "SET_SETTINGS", settings: next });
+                    }}
                     className="sr-only"
                   />
                   <span
