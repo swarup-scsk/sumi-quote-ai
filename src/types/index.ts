@@ -204,5 +204,5 @@ export const DEFAULT_SETTINGS: AppSettings = {
   n8n_base_url: "http://localhost:5678/webhook",
   confidence_thresholds: { high: 0.80, low: 0.40 },
   default_customer_tier: "Contract",
-  demo_mode: false,
+  demo_mode: true,
 };
