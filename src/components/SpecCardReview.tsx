@@ -55,7 +55,7 @@ export function SpecCardReview({ rfqId }: Props) {
   const spec = rfq?.spec_card;
 
   const [values, setValues] = useState<Record<string, string>>(() => {
-    if (!spec) return {};
+    if (!spec) return {} as Record<string, string>;
     return {
       grade: spec.grade ?? "",
       thickness_mm: spec.thickness_mm?.toString() ?? "",
