@@ -5,13 +5,13 @@
 // If settings.demo_mode = true, returns mock data instead (for offline demos).
 // ─────────────────────────────────────────────────────────────────────────────
 
+import { DEFAULT_SETTINGS } from "@/types";
 import type {
   SpecCard,
   ConfirmedSpec,
   Quote,
   AuditEvent,
   AppSettings,
-  DEFAULT_SETTINGS,
 } from "@/types";
 
 // ── Settings loader (reads from localStorage) ─────────────────────────────────
