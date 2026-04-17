@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { PlaceholderScreen } from "@/components/PlaceholderScreen";
+import { SpecCardReview } from "@/components/SpecCardReview";
 
 export const Route = createFileRoute("/rfq/$id")({
   head: () => ({
@@ -13,10 +13,5 @@ export const Route = createFileRoute("/rfq/$id")({
 
 function SpecReviewPage() {
   const { id } = Route.useParams();
-  return (
-    <PlaceholderScreen
-      title={`Spec Card Review — ${id}`}
-      description="Confirm grade, dimensions, coating, processing requirements and quantity before generating a quote."
-    />
-  );
+  return <SpecCardReview rfqId={id} />;
 }
