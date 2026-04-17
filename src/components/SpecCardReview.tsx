@@ -39,12 +39,6 @@ const FIELD_DEFS: { key: FieldKey; label: string; type: "text" | "number"; confi
   { key: "delivery_format", label: "Delivery Format", type: "text", confidenceKey: "delivery_format_confidence" },
 ];
 
-function confidenceColor(pct: number) {
-  if (pct >= 80) return "text-brand";
-  if (pct >= 40) return "text-amber";
-  return "text-coral";
-}
-
 function dotColor(status: FieldStatus) {
   if (status === "auto") return "bg-brand";
   if (status === "review") return "bg-amber";
