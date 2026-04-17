@@ -1,26 +1,21 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { PlaceholderScreen } from "@/components/PlaceholderScreen";
 
 export const Route = createFileRoute("/")({
-  component: Index,
+  head: () => ({
+    meta: [
+      { title: "RFQ Inbox — Sales & Quoting AI" },
+      { name: "description", content: "Incoming RFQ PDFs awaiting spec extraction and review." },
+    ],
+  }),
+  component: InboxPage,
 });
 
-// IMPORTANT: Replace this placeholder. For sites with multiple pages (About, Services, Contact, etc.),
-// create separate route files (about.tsx, services.tsx, contact.tsx) — don't put all pages in this file.
-function PlaceholderIndex() {
+function InboxPage() {
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
+    <PlaceholderScreen
+      title="RFQ Inbox"
+      description="Drop RFQ PDFs here to extract spec cards. List of incoming and in-progress RFQs will appear here."
+    />
   );
-}
-
-function Index() {
-  return <PlaceholderIndex />;
 }
