@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useReducer, useRef, type ReactNod
 import type { Session } from "@supabase/supabase-js";
 import type { AppSettings, RFQInboxItem, SpecCard, Quote, ActivityLogEntry } from "@/types";
 import { DEFAULT_SETTINGS } from "@/types";
-import { getSettings, saveSettings } from "@lib/api";
+import { getSettings, saveSettings } from "@/lib/api";
 import { supabase } from "@/integrations/supabase/client";
 
 interface State {
