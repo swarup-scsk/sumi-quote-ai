@@ -40,6 +40,20 @@ function upsertItem(list: RFQInboxItem[], item: RFQInboxItem): RFQInboxItem[] {
   return next;
 }
 
+function appendLog(item: RFQInboxItem, action: string, userEmail: string, userId?: string, details?: string): RFQInboxItem {
+  const entry: ActivityLogEntry = {
+    action,
+    timestamp: new Date().toISOString(),
+    user_email: userEmail,
+    user_id: userId,
+    details,
+  };
+  return {
+    ...item,
+    activity_log: [...(item.activity_log ?? []), entry],
+  };
+}
+
 function reducer(state: State, action: Action): State {
   switch (action.type) {
     case "ADD_RFQ":
