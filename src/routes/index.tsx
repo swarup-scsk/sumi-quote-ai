@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useApp } from "@/context/AppContext";
 import { RFQUpload } from "@/components/RFQUpload";
 import { RFQList } from "@/components/RFQList";
+import { ActivityTrail } from "@/components/ActivityTrail";
 
 export const Route = createFileRoute("/")({
   head: () => ({
