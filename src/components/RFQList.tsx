@@ -291,7 +291,7 @@ export function RFQList({ items }: { items: RFQInboxItem[] }) {
                     </td>
                   </tr>
                   {isOpen && <TrailRow item={item} />}
-                </>
+                </Fragment>
               );
             })}
           </tbody>
