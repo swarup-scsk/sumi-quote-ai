@@ -120,7 +120,7 @@ function rowToItem(r: RFQRow): RFQInboxItem {
   };
 }
 
-function itemToRow(item: RFQInboxItem, userId?: string): Partial<RFQRow> & { rfq_id: string } {
+function itemToRow(item: RFQInboxItem, userId?: string) {
   return {
     rfq_id: item.rfq_id,
     customer_name: item.customer_name,
@@ -130,11 +130,11 @@ function itemToRow(item: RFQInboxItem, userId?: string): Partial<RFQRow> & { rfq
     status: item.status,
     overall_confidence: item.overall_confidence ?? null,
     flagged_field_count: item.flagged_field_count ?? null,
-    spec_card: item.spec_card ?? null,
-    quote: item.quote ?? null,
+    spec_card: (item.spec_card ?? null) as never,
+    quote: (item.quote ?? null) as never,
     error_message: item.error_message ?? null,
-    ...(userId ? { created_by: userId } : {}),
-  } as Partial<RFQRow> & { rfq_id: string };
+    created_by: userId ?? null,
+  };
 }
 
 async function persistAction(action: Action, getItem: (id: string) => RFQInboxItem | undefined, userId?: string) {

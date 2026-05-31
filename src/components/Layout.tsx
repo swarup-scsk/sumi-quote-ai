@@ -63,6 +63,39 @@ function BottomNavIcon({
   );
 }
 
+function HeaderBar() {
+  const { state, signOut } = useApp();
+  const email = state.session?.user.email;
+  return (
+    <header className="flex h-14 items-center justify-between border-b border-border bg-white px-6">
+      <div className="flex items-center gap-3">
+        <h1 className="text-lg font-semibold tracking-tight text-brand">
+          Sales &amp; Quoting AI
+        </h1>
+        <span className="rounded-full bg-amber/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-amber">
+          Prototype
+        </span>
+      </div>
+      <div className="flex items-center gap-3">
+        {email && (
+          <span className="hidden max-w-[200px] truncate text-xs text-mid sm:block" title={email}>
+            {email}
+          </span>
+        )}
+        <button
+          type="button"
+          onClick={() => void signOut()}
+          className="inline-flex items-center gap-1.5 rounded-md border border-border bg-white px-2.5 py-1 text-xs font-medium text-mid hover:border-brand hover:text-brand"
+          title="Sign out"
+        >
+          <LogOut className="h-3.5 w-3.5" />
+          <span className="hidden sm:inline">Sign out</span>
+        </button>
+      </div>
+    </header>
+  );
+}
+
 export function Layout({ children }: { children?: ReactNode }) {
   const { pathname } = useLocation();
 
