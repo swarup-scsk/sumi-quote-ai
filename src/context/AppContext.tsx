@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useReducer, useRef, type ReactNode } from "react";
 import type { Session } from "@supabase/supabase-js";
-import type { AppSettings, RFQInboxItem, SpecCard, Quote } from "@/types";
+import type { AppSettings, RFQInboxItem, SpecCard, Quote, ActivityLogEntry } from "@/types";
 import { DEFAULT_SETTINGS } from "@/types";
 import { getSettings, saveSettings } from "@/lib/api";
 import { supabase } from "@/integrations/supabase/client";
@@ -38,6 +38,20 @@ function upsertItem(list: RFQInboxItem[], item: RFQInboxItem): RFQInboxItem[] {
   const next = list.slice();
   next[idx] = { ...next[idx], ...item };
   return next;
+}
+
+function appendLog(item: RFQInboxItem, action: string, userEmail: string, userId?: string, details?: string): RFQInboxItem {
+  const entry: ActivityLogEntry = {
+    action,
+    timestamp: new Date().toISOString(),
+    user_email: userEmail,
+    user_id: userId,
+    details,
+  };
+  return {
+    ...item,
+    activity_log: [...(item.activity_log ?? []), entry],
+  };
 }
 
 function reducer(state: State, action: Action): State {
@@ -102,6 +116,7 @@ type RFQRow = {
   spec_card: SpecCard | null;
   quote: Quote | null;
   error_message: string | null;
+  activity_log: ActivityLogEntry[] | null;
 };
 
 function rowToItem(r: RFQRow): RFQInboxItem {
@@ -117,10 +132,11 @@ function rowToItem(r: RFQRow): RFQInboxItem {
     spec_card: r.spec_card ?? undefined,
     quote: r.quote ?? undefined,
     error_message: r.error_message ?? undefined,
+    activity_log: r.activity_log ?? undefined,
   };
 }
 
-function itemToRow(item: RFQInboxItem, userId?: string) {
+function itemToRow(item: RFQInboxItem) {
   return {
     rfq_id: item.rfq_id,
     customer_name: item.customer_name,
@@ -133,22 +149,22 @@ function itemToRow(item: RFQInboxItem, userId?: string) {
     spec_card: (item.spec_card ?? null) as never,
     quote: (item.quote ?? null) as never,
     error_message: item.error_message ?? null,
-    created_by: userId ?? null,
+    activity_log: (item.activity_log ?? []) as never,
   };
 }
 
-async function persistAction(action: Action, getItem: (id: string) => RFQInboxItem | undefined, userId?: string) {
+async function persistAction(action: Action, getItem: (id: string) => RFQInboxItem | undefined) {
   try {
     switch (action.type) {
       case "ADD_RFQ":
-        await supabase.from("rfqs").upsert(itemToRow(action.rfq, userId), { onConflict: "rfq_id" });
+        await supabase.from("rfqs").upsert(itemToRow(action.rfq), { onConflict: "rfq_id" });
         break;
       case "UPDATE_RFQ":
       case "SET_SPEC_CARD":
       case "SET_QUOTE": {
         const id = "rfq_id" in action ? action.rfq_id : "";
         const next = getItem(id);
-        if (next) await supabase.from("rfqs").upsert(itemToRow(next, userId), { onConflict: "rfq_id" });
+        if (next) await supabase.from("rfqs").upsert(itemToRow(next), { onConflict: "rfq_id" });
         break;
       }
       case "REMOVE_RFQ":
@@ -175,14 +191,60 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const stateRef = useRef(state);
   stateRef.current = state;
 
-  // Wrap dispatch so DB writes happen as a side effect of local updates.
+  // Wrap dispatch so activity log entries and DB writes happen as side effects.
   const dispatch = (action: Action) => {
-    baseDispatch(action);
-    if (state.session) {
-      // Compute "after-state" lazily via stateRef in microtask.
+    const user = stateRef.current.session?.user;
+    const userEmail = user?.email ?? "Unknown";
+    const userId = user?.id;
+
+    if (user) {
+      switch (action.type) {
+        case "ADD_RFQ": {
+          const rfq = appendLog(action.rfq, "RFQ uploaded", userEmail, userId, action.rfq.filename);
+          baseDispatch({ type: "ADD_RFQ", rfq });
+          break;
+        }
+        case "SET_SPEC_CARD": {
+          const current = stateRef.current.rfqList.find((r) => r.rfq_id === action.rfq_id);
+          if (current) {
+            const updated = appendLog(
+              current,
+              "Spec confirmed",
+              userEmail,
+              userId,
+              `Confidence ${Math.round((action.spec_card.overall_confidence ?? 0) * 100)}%`,
+            );
+            baseDispatch({ type: "UPDATE_RFQ", rfq_id: action.rfq_id, patch: { activity_log: updated.activity_log } });
+          }
+          baseDispatch(action);
+          break;
+        }
+        case "SET_QUOTE": {
+          const current = stateRef.current.rfqList.find((r) => r.rfq_id === action.rfq_id);
+          if (current) {
+            const updated = appendLog(
+              current,
+              "Quote generated",
+              userEmail,
+              userId,
+              `${action.quote.quote_id} · €${action.quote.pricing_breakdown.quote_value_eur.toLocaleString()}`,
+            );
+            baseDispatch({ type: "UPDATE_RFQ", rfq_id: action.rfq_id, patch: { activity_log: updated.activity_log } });
+          }
+          baseDispatch(action);
+          break;
+        }
+        default:
+          baseDispatch(action);
+      }
+    } else {
+      baseDispatch(action);
+    }
+
+    if (stateRef.current.session) {
       queueMicrotask(() => {
         const getItem = (id: string) => stateRef.current.rfqList.find((r) => r.rfq_id === id);
-        void persistAction(action, getItem, stateRef.current.session?.user.id);
+        void persistAction(action, getItem);
       });
     }
   };

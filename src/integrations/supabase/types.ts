@@ -16,6 +16,7 @@ export type Database = {
     Tables: {
       rfqs: {
         Row: {
+          activity_log: Json | null
           created_at: string
           created_by: string | null
           customer_name: string
@@ -32,6 +33,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          activity_log?: Json | null
           created_at?: string
           created_by?: string | null
           customer_name: string
@@ -48,6 +50,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          activity_log?: Json | null
           created_at?: string
           created_by?: string | null
           customer_name?: string

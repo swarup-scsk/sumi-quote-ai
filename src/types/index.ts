@@ -167,6 +167,15 @@ export interface AuditEvent {
   timestamp?: string;        // defaults to now in N8N
 }
 
+// ── Activity Log Entry ────────────────────────────────────────────────────────
+export interface ActivityLogEntry {
+  action: string;
+  timestamp: string;      // ISO 8601
+  user_email: string;
+  user_id?: string;
+  details?: string;
+}
+
 // ── RFQ Inbox Item (local state, derived from SpecCard) ───────────────────────
 export interface RFQInboxItem {
   rfq_id: string;
@@ -180,6 +189,7 @@ export interface RFQInboxItem {
   spec_card?: SpecCard;
   quote?: Quote;
   error_message?: string;
+  activity_log?: ActivityLogEntry[];
 }
 
 // ── Customer Tier ─────────────────────────────────────────────────────────────
