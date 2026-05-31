@@ -65,9 +65,13 @@ export function SettingsPanel() {
         </p>
       </header>
 
-      {draft.demo_mode && (
+      {draft.demo_mode ? (
         <div className="rounded-lg border border-amber/40 bg-amber/10 px-4 py-3 text-sm text-amber">
           Demo mode active — no real N8N calls are being made.
+        </div>
+      ) : (
+        <div className="rounded-lg border border-green-500/40 bg-green-500/10 px-4 py-3 text-sm text-green-700">
+          Live mode active — real N8N calls are being made.
         </div>
       )}
 
