@@ -209,9 +209,15 @@ function TrailRow({ item }: { item: RFQInboxItem }) {
                 <div className="min-w-0 flex-1">
                   <div className="flex items-baseline justify-between gap-3">
                     <p className="text-sm font-medium text-ink">{e.label}</p>
-                    <span className="text-[11px] text-mid shrink-0">{formatTime(e.ts)}</span>
+                    <span className="shrink-0 text-[11px] text-mid">{formatTime(e.ts)}</span>
                   </div>
                   {e.detail && <p className="text-xs text-mid">{e.detail}</p>}
+                  {e.user && (
+                    <div className="mt-0.5 flex items-center gap-1 text-[11px] text-mid">
+                      <User className="h-3 w-3" />
+                      <span>{e.user}</span>
+                    </div>
+                  )}
                 </div>
               </li>
             );
