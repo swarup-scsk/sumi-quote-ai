@@ -228,8 +228,8 @@ export function RFQList({ items }: { items: RFQInboxItem[] }) {
               const isOpen = !!expanded[item.rfq_id];
 
               return (
-                <>
-                  <tr key={item.rfq_id} className="hover:bg-surface">
+                <Fragment key={item.rfq_id}>
+                  <tr className="hover:bg-surface">
                     <td className="px-2 py-3">
                       <button
                         type="button"
