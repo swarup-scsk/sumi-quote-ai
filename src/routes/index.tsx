@@ -26,6 +26,7 @@ function InboxPage() {
       </div>
       <RFQUpload />
       <RFQList items={state.rfqList} />
+      <ActivityTrail items={state.rfqList} />
     </div>
   );
 }
