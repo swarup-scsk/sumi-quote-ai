@@ -65,6 +65,7 @@ type TrailEvent = {
   detail?: string;
   icon: typeof Upload;
   tone: "mid" | "brand" | "amber" | "coral";
+  user?: string;
 };
 
 const toneClasses: Record<TrailEvent["tone"], string> = {
@@ -74,69 +75,106 @@ const toneClasses: Record<TrailEvent["tone"], string> = {
   coral: "bg-coral/15 text-coral",
 };
 
+function actionToIcon(action: string): typeof Upload {
+  const a = action.toLowerCase();
+  if (a.includes("upload")) return Upload;
+  if (a.includes("extract")) return FileSearch;
+  if (a.includes("confirm")) return CheckCircle2;
+  if (a.includes("generate")) return FileText;
+  if (a.includes("approve")) return ShieldCheck;
+  if (a.includes("escal") || a.includes("require")) return AlertTriangle;
+  if (a.includes("error")) return XCircle;
+  return FileText;
+}
+
+function actionToTone(action: string): TrailEvent["tone"] {
+  const a = action.toLowerCase();
+  if (a.includes("error")) return "coral";
+  if (a.includes("escal") || a.includes("require") || a.includes("flag")) return "amber";
+  if (a.includes("confirm") || a.includes("approve") || a.includes("generate")) return "brand";
+  return "mid";
+}
+
 function buildEvents(item: RFQInboxItem): TrailEvent[] {
   const events: TrailEvent[] = [];
-  events.push({
-    ts: item.received_at,
-    label: "RFQ uploaded",
-    detail: item.filename,
-    icon: Upload,
-    tone: "mid",
-  });
-  if (item.status === "processing") {
-    events.push({
-      ts: item.received_at,
-      label: "Extraction in progress",
-      icon: FileSearch,
-      tone: "amber",
-    });
-  }
-  if (item.spec_card) {
-    const sc = item.spec_card;
-    events.push({
-      ts: sc.extracted_at,
-      label: "Spec extracted",
-      detail: `Confidence ${Math.round((sc.overall_confidence ?? 0) * 100)}% · ${sc.flagged_field_count ?? 0} flagged`,
-      icon: FileSearch,
-      tone: (sc.flagged_field_count ?? 0) > 0 ? "amber" : "brand",
-    });
-    if (sc.status === "confirmed" || sc.status === "quoted") {
+
+  // Prefer stored activity log when available
+  if (item.activity_log && item.activity_log.length > 0) {
+    for (const log of item.activity_log) {
       events.push({
-        ts: sc.extracted_at,
-        label: "Spec confirmed",
-        detail: "Rep approved extracted fields",
-        icon: CheckCircle2,
-        tone: "brand",
+        ts: log.timestamp,
+        label: log.action,
+        detail: log.details,
+        icon: actionToIcon(log.action),
+        tone: actionToTone(log.action),
+        user: log.user_email,
       });
     }
-  }
-  if (item.quote) {
-    const q = item.quote;
+  } else {
+    // Legacy fallback: infer events from state
     events.push({
-      ts: q.generated_at,
-      label: "Quote generated",
-      detail: `${q.quote_id} · €${q.pricing_breakdown.quote_value_eur.toLocaleString()} · margin ${q.margin.gross_margin_pct.toFixed(1)}%`,
-      icon: FileText,
-      tone: "brand",
+      ts: item.received_at,
+      label: "RFQ uploaded",
+      detail: item.filename,
+      icon: Upload,
+      tone: "mid",
     });
-    if (q.margin.auto_approved) {
+    if (item.status === "processing") {
       events.push({
-        ts: q.generated_at,
-        label: "Auto-approved",
-        detail: q.approval_message,
-        icon: ShieldCheck,
-        tone: "brand",
-      });
-    } else {
-      events.push({
-        ts: q.generated_at,
-        label: "Manager approval required",
-        detail: q.margin.approval_reason ?? q.approval_message,
-        icon: AlertTriangle,
+        ts: item.received_at,
+        label: "Extraction in progress",
+        icon: FileSearch,
         tone: "amber",
       });
     }
+    if (item.spec_card) {
+      const sc = item.spec_card;
+      events.push({
+        ts: sc.extracted_at,
+        label: "Spec extracted",
+        detail: `Confidence ${Math.round((sc.overall_confidence ?? 0) * 100)}% · ${sc.flagged_field_count ?? 0} flagged`,
+        icon: FileSearch,
+        tone: (sc.flagged_field_count ?? 0) > 0 ? "amber" : "brand",
+      });
+      if (sc.status === "confirmed" || sc.status === "quoted") {
+        events.push({
+          ts: sc.extracted_at,
+          label: "Spec confirmed",
+          detail: "Rep approved extracted fields",
+          icon: CheckCircle2,
+          tone: "brand",
+        });
+      }
+    }
+    if (item.quote) {
+      const q = item.quote;
+      events.push({
+        ts: q.generated_at,
+        label: "Quote generated",
+        detail: `${q.quote_id} · €${q.pricing_breakdown.quote_value_eur.toLocaleString()} · margin ${q.margin.gross_margin_pct.toFixed(1)}%`,
+        icon: FileText,
+        tone: "brand",
+      });
+      if (q.margin.auto_approved) {
+        events.push({
+          ts: q.generated_at,
+          label: "Auto-approved",
+          detail: q.approval_message,
+          icon: ShieldCheck,
+          tone: "brand",
+        });
+      } else {
+        events.push({
+          ts: q.generated_at,
+          label: "Manager approval required",
+          detail: q.margin.approval_reason ?? q.approval_message,
+          icon: AlertTriangle,
+          tone: "amber",
+        });
+      }
+    }
   }
+
   if (item.status === "error") {
     events.push({
       ts: item.received_at,
@@ -146,6 +184,7 @@ function buildEvents(item: RFQInboxItem): TrailEvent[] {
       tone: "coral",
     });
   }
+
   return events.sort((a, b) => new Date(a.ts).getTime() - new Date(b.ts).getTime());
 }
 
