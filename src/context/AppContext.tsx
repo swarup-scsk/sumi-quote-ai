@@ -153,18 +153,18 @@ function itemToRow(item: RFQInboxItem) {
   };
 }
 
-async function persistAction(action: Action, getItem: (id: string) => RFQInboxItem | undefined, userId?: string) {
+async function persistAction(action: Action, getItem: (id: string) => RFQInboxItem | undefined) {
   try {
     switch (action.type) {
       case "ADD_RFQ":
-        await supabase.from("rfqs").upsert(itemToRow(action.rfq, userId), { onConflict: "rfq_id" });
+        await supabase.from("rfqs").upsert(itemToRow(action.rfq), { onConflict: "rfq_id" });
         break;
       case "UPDATE_RFQ":
       case "SET_SPEC_CARD":
       case "SET_QUOTE": {
         const id = "rfq_id" in action ? action.rfq_id : "";
         const next = getItem(id);
-        if (next) await supabase.from("rfqs").upsert(itemToRow(next, userId), { onConflict: "rfq_id" });
+        if (next) await supabase.from("rfqs").upsert(itemToRow(next), { onConflict: "rfq_id" });
         break;
       }
       case "REMOVE_RFQ":
@@ -191,14 +191,60 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const stateRef = useRef(state);
   stateRef.current = state;
 
-  // Wrap dispatch so DB writes happen as a side effect of local updates.
+  // Wrap dispatch so activity log entries and DB writes happen as side effects.
   const dispatch = (action: Action) => {
-    baseDispatch(action);
-    if (state.session) {
-      // Compute "after-state" lazily via stateRef in microtask.
+    const user = stateRef.current.session?.user;
+    const userEmail = user?.email ?? "Unknown";
+    const userId = user?.id;
+
+    if (user) {
+      switch (action.type) {
+        case "ADD_RFQ": {
+          const rfq = appendLog(action.rfq, "RFQ uploaded", userEmail, userId, action.rfq.filename);
+          baseDispatch({ type: "ADD_RFQ", rfq });
+          break;
+        }
+        case "SET_SPEC_CARD": {
+          const current = stateRef.current.rfqList.find((r) => r.rfq_id === action.rfq_id);
+          if (current) {
+            const updated = appendLog(
+              current,
+              "Spec confirmed",
+              userEmail,
+              userId,
+              `Confidence ${Math.round((action.spec_card.overall_confidence ?? 0) * 100)}%`,
+            );
+            baseDispatch({ type: "UPDATE_RFQ", rfq_id: action.rfq_id, patch: { activity_log: updated.activity_log } });
+          }
+          baseDispatch(action);
+          break;
+        }
+        case "SET_QUOTE": {
+          const current = stateRef.current.rfqList.find((r) => r.rfq_id === action.rfq_id);
+          if (current) {
+            const updated = appendLog(
+              current,
+              "Quote generated",
+              userEmail,
+              userId,
+              `${action.quote.quote_id} · €${action.quote.pricing_breakdown.quote_value_eur.toLocaleString()}`,
+            );
+            baseDispatch({ type: "UPDATE_RFQ", rfq_id: action.rfq_id, patch: { activity_log: updated.activity_log } });
+          }
+          baseDispatch(action);
+          break;
+        }
+        default:
+          baseDispatch(action);
+      }
+    } else {
+      baseDispatch(action);
+    }
+
+    if (stateRef.current.session) {
       queueMicrotask(() => {
         const getItem = (id: string) => stateRef.current.rfqList.find((r) => r.rfq_id === id);
-        void persistAction(action, getItem, stateRef.current.session?.user.id);
+        void persistAction(action, getItem);
       });
     }
   };
