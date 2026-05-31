@@ -102,6 +102,7 @@ type RFQRow = {
   spec_card: SpecCard | null;
   quote: Quote | null;
   error_message: string | null;
+  activity_log: ActivityLogEntry[] | null;
 };
 
 function rowToItem(r: RFQRow): RFQInboxItem {
@@ -117,10 +118,11 @@ function rowToItem(r: RFQRow): RFQInboxItem {
     spec_card: r.spec_card ?? undefined,
     quote: r.quote ?? undefined,
     error_message: r.error_message ?? undefined,
+    activity_log: r.activity_log ?? undefined,
   };
 }
 
-function itemToRow(item: RFQInboxItem, userId?: string) {
+function itemToRow(item: RFQInboxItem) {
   return {
     rfq_id: item.rfq_id,
     customer_name: item.customer_name,
@@ -133,7 +135,7 @@ function itemToRow(item: RFQInboxItem, userId?: string) {
     spec_card: (item.spec_card ?? null) as never,
     quote: (item.quote ?? null) as never,
     error_message: item.error_message ?? null,
-    created_by: userId ?? null,
+    activity_log: (item.activity_log ?? []) as never,
   };
 }
 
