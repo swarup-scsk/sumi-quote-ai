@@ -59,7 +59,7 @@ export function SettingsPanel() {
   return (
     <div className="mx-auto max-w-4xl space-y-6 p-6">
       <header>
-        <h2 className="text-2xl font-semibold tracking-tight text-ink">Settings</h2>
+        <h2 className="text-2xl font-semibold tracking-tight text-ink">Configuration &amp; Settings</h2>
         <p className="text-sm text-mid">
           Configure connection, AI thresholds and customer defaults. All changes persist locally.
         </p>
