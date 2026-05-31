@@ -31,14 +31,18 @@ export const Route = createRootRoute({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
+      { title: "Steel - Quote AI" },
+      { name: "description", content: "AI-powered sales and quoting tool for steel sales representatives." },
       { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { property: "og:title", content: "Steel - Quote AI" },
+      { property: "og:description", content: "AI-powered sales and quoting tool for steel sales representatives." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "Steel - Quote AI" },
+      { name: "twitter:description", content: "AI-powered sales and quoting tool for steel sales representatives." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/69e0c198-b544-4d11-acd3-b333a24ae60e/id-preview-3fa2503a--b4b888a8-1065-4608-b824-963e4a80558f.lovable.app-1780241166775.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/69e0c198-b544-4d11-acd3-b333a24ae60e/id-preview-3fa2503a--b4b888a8-1065-4608-b824-963e4a80558f.lovable.app-1780241166775.png" },
     ],
     links: [
       {
