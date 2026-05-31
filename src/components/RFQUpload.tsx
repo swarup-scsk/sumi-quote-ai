@@ -238,7 +238,17 @@ export function RFQUpload() {
           )}
         </div>
       </div>
-      {submitting && <LoadingOverlay message="Extracting spec with AI…" />}
+      {submitting && (
+        <LoadingOverlay
+          messages={[
+            "Reading the RFQ document…",
+            "Extracting grade & dimensions…",
+            "Identifying coating & standard…",
+            "Scoring field confidence…",
+            "Assembling the spec card…",
+          ]}
+        />
+      )}
     </form>
   );
 }

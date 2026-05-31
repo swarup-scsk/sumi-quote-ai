@@ -416,7 +416,17 @@ export function SpecCardReview({ rfqId }: Props) {
           </div>
         </div>
       </form>
-      {submitting && <LoadingOverlay message="Generating quote…" />}
+      {submitting && (
+        <LoadingOverlay
+          messages={[
+            "Confirming the specification…",
+            "Checking inventory availability…",
+            "Building the pricing breakdown…",
+            "Running the margin check…",
+            "Finalising the quote…",
+          ]}
+        />
+      )}
     </TooltipProvider>
   );
 }
