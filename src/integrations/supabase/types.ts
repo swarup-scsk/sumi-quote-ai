@@ -14,7 +14,57 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      rfqs: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          customer_name: string
+          error_message: string | null
+          filename: string
+          flagged_field_count: number | null
+          overall_confidence: number | null
+          quote: Json | null
+          received_at: string
+          rfq_id: string
+          spec_card: Json | null
+          status: string
+          subject: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          customer_name: string
+          error_message?: string | null
+          filename: string
+          flagged_field_count?: number | null
+          overall_confidence?: number | null
+          quote?: Json | null
+          received_at?: string
+          rfq_id: string
+          spec_card?: Json | null
+          status: string
+          subject: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          customer_name?: string
+          error_message?: string | null
+          filename?: string
+          flagged_field_count?: number | null
+          overall_confidence?: number | null
+          quote?: Json | null
+          received_at?: string
+          rfq_id?: string
+          spec_card?: Json | null
+          status?: string
+          subject?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
