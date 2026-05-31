@@ -12,6 +12,7 @@ import {
   ShieldCheck,
   AlertTriangle,
   XCircle,
+  User,
 } from "lucide-react";
 import type { RFQInboxItem } from "@/types";
 import { getConfidenceColor } from "@/lib/confidence";
