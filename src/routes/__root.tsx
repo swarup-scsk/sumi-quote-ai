@@ -1,6 +1,8 @@
 import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
-import { AppProvider } from "@/context/AppContext";
+import { Loader2 } from "lucide-react";
+import { AppProvider, useApp } from "@/context/AppContext";
 import { Layout } from "@/components/Layout";
+import { AuthPage } from "@/components/AuthPage";
 
 import appCss from "../styles.css?url";
 
@@ -70,12 +72,27 @@ function RootShell({ children }: { children: React.ReactNode }) {
   );
 }
 
+function AuthGate() {
+  const { state } = useApp();
+  if (!state.authReady) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-surface">
+        <Loader2 className="h-6 w-6 animate-spin text-brand" />
+      </div>
+    );
+  }
+  if (!state.session) return <AuthPage />;
+  return (
+    <Layout>
+      <Outlet />
+    </Layout>
+  );
+}
+
 function RootComponent() {
   return (
     <AppProvider>
-      <Layout>
-        <Outlet />
-      </Layout>
+      <AuthGate />
     </AppProvider>
   );
 }
