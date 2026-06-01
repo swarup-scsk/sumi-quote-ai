@@ -291,6 +291,13 @@ export function QuotePreview({ rfqId }: Props) {
           <Download className="mr-1.5 size-4" /> Download RFQ
         </Button>
         <Button
+          variant="outline"
+          onClick={handleDownloadQuote}
+          className="border-brand text-brand hover:bg-brand-bg"
+        >
+          <Download className="mr-1.5 size-4" /> Download Quote
+        </Button>
+        <Button
           onClick={handleSend}
           disabled={!customerEmail}
           title={customerEmail ? `Email ${customerEmail}` : "No customer email on file"}
