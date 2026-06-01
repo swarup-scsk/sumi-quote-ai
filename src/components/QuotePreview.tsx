@@ -277,7 +277,19 @@ export function QuotePreview({ rfqId }: Props) {
         >
           Edit spec
         </Link>
-        <Button onClick={handleSend} className="bg-brand text-white hover:bg-brand-dark">
+        <Button
+          variant="outline"
+          onClick={handleDownloadRFQ}
+          className="border-border bg-white text-ink hover:bg-surface"
+        >
+          <Download className="mr-1.5 size-4" /> Download RFQ
+        </Button>
+        <Button
+          onClick={handleSend}
+          disabled={!customerEmail}
+          title={customerEmail ? `Email ${customerEmail}` : "No customer email on file"}
+          className="bg-brand text-white hover:bg-brand-dark"
+        >
           <Send className="mr-1.5 size-4" /> Send Quote
         </Button>
       </div>
