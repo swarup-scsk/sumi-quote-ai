@@ -7,9 +7,11 @@ import {
   Package,
   PackageX,
   Send,
+  Download,
 } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import { logAuditEvent } from "@/lib/api";
+import { buildRFQPdf, buildQuotePdf, downloadPdf } from "@/lib/pdf";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
