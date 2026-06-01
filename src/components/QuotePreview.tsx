@@ -7,9 +7,11 @@ import {
   Package,
   PackageX,
   Send,
+  Download,
 } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import { logAuditEvent } from "@/lib/api";
+import { buildRFQPdf, buildQuotePdf, downloadPdf } from "@/lib/pdf";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -61,7 +63,49 @@ export function QuotePreview({ rfqId }: Props) {
     { label: "Handling", value: pb.handling_per_tonne },
   ];
 
+  const customerEmail = rfq.spec_card?.email_from?.trim() ?? "";
+
+  function handleDownloadRFQ() {
+    const doc = buildRFQPdf(rfq!);
+    downloadPdf(doc, `${rfq!.rfq_id}-RFQ.pdf`);
+    toast.success("RFQ downloaded");
+  }
+
   function handleSend() {
+    // 1. Generate + download the quote PDF so the user can attach it.
+    const quotePdf = buildQuotePdf(quote!);
+    const filename = `${quote!.quote_id}.pdf`;
+    downloadPdf(quotePdf, filename);
+
+    // 2. Compose the email body.
+    const greetingName = quote!.customer_name;
+    const subject = `Quotation ${quote!.quote_id} — ${quote!.spec.grade} ${quote!.spec.thickness_mm}mm × ${quote!.spec.width_mm}mm`;
+    const body = [
+      `Dear ${greetingName} team,`,
+      ``,
+      `Thank you for your enquiry. Please find attached our quotation ${quote!.quote_id} covering:`,
+      ``,
+      `  • Material: ${quote!.spec.grade} (${quote!.spec.standard})`,
+      `  • Dimensions: ${quote!.spec.thickness_mm} mm × ${quote!.spec.width_mm} mm, ${quote!.spec.coating}`,
+      `  • Quantity: ${quote!.spec.quantity_tonnes} t`,
+      `  • Total quote value: ${eur.format(quote!.pricing_breakdown.quote_value_eur)}`,
+      `  • Payment terms: ${quote!.payment_terms}`,
+      `  • Valid until: ${fmtDate(quote!.valid_until)}`,
+      ``,
+      `Stock availability: ${quote!.inventory.available ? `available from ${quote!.inventory.location}` : "to be confirmed"}.`,
+      ``,
+      `The full breakdown is in the attached PDF (${filename}). Please reattach it from your downloads folder before sending.`,
+      ``,
+      `Do let us know if you have any questions or would like to proceed.`,
+      ``,
+      `Kind regards,`,
+      `Sumitomo Steel — Sales & Quoting`,
+    ].join("\n");
+
+    // 3. Open the user's default mail client with recipient + subject + body.
+    const mailto = `mailto:${encodeURIComponent(customerEmail)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    window.location.href = mailto;
+
     logAuditEvent({
       event_type: "quote_sent",
       rfq_id: rfqId,
@@ -69,7 +113,7 @@ export function QuotePreview({ rfqId }: Props) {
       customer_name: quote!.customer_name,
       quote_value_eur: quote!.pricing_breakdown.quote_value_eur,
     });
-    toast.success("Quote sent to customer", { duration: 2500 });
+    toast.success("Quote PDF downloaded — attach it in your email draft", { duration: 4000 });
   }
 
   return (
@@ -233,7 +277,19 @@ export function QuotePreview({ rfqId }: Props) {
         >
           Edit spec
         </Link>
-        <Button onClick={handleSend} className="bg-brand text-white hover:bg-brand-dark">
+        <Button
+          variant="outline"
+          onClick={handleDownloadRFQ}
+          className="border-border bg-white text-ink hover:bg-surface"
+        >
+          <Download className="mr-1.5 size-4" /> Download RFQ
+        </Button>
+        <Button
+          onClick={handleSend}
+          disabled={!customerEmail}
+          title={customerEmail ? `Email ${customerEmail}` : "No customer email on file"}
+          className="bg-brand text-white hover:bg-brand-dark"
+        >
           <Send className="mr-1.5 size-4" /> Send Quote
         </Button>
       </div>
