@@ -71,6 +71,12 @@ export function QuotePreview({ rfqId }: Props) {
     toast.success("RFQ downloaded");
   }
 
+  function handleDownloadQuote() {
+    const doc = buildQuotePdf(quote!);
+    downloadPdf(doc, `${quote!.quote_id}.pdf`);
+    toast.success("Quote downloaded");
+  }
+
   function handleSend() {
     // 1. Generate + download the quote PDF so the user can attach it.
     const quotePdf = buildQuotePdf(quote!);
@@ -283,6 +289,13 @@ export function QuotePreview({ rfqId }: Props) {
           className="border-border bg-white text-ink hover:bg-surface"
         >
           <Download className="mr-1.5 size-4" /> Download RFQ
+        </Button>
+        <Button
+          variant="outline"
+          onClick={handleDownloadQuote}
+          className="border-brand text-brand hover:bg-brand-bg"
+        >
+          <Download className="mr-1.5 size-4" /> Download Quote
         </Button>
         <Button
           onClick={handleSend}
