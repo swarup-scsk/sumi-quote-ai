@@ -428,9 +428,10 @@ export function SpecCardReview({ rfqId }: Props) {
               />
             </div>
             <div className="flex items-center gap-3">
-              <Button type="button" variant="outline" disabled={submitting}>
-                Save Draft
+              <Button type="button" variant="outline" disabled={submitting || savingDraft} onClick={handleSaveDraft}>
+                {savingDraft ? "Saved ✓" : "Save Draft"}
               </Button>
+
               <Tooltip>
                 <TooltipTrigger asChild>
                   <span tabIndex={-1}>
