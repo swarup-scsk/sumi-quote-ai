@@ -142,7 +142,37 @@ export function SpecCardReview({ rfqId }: Props) {
     });
   }
 
+  function buildUpdatedSpec(): SpecCard {
+    return {
+      ...spec!,
+      grade: values.grade || null,
+      thickness_mm: values.thickness_mm ? Number(values.thickness_mm) : null,
+      thickness_tolerance: values.thickness_tolerance || null,
+      width_mm: values.width_mm ? Number(values.width_mm) : null,
+      coating: values.coating || null,
+      quantity_tonnes: values.quantity_tonnes ? Number(values.quantity_tonnes) : null,
+      standard: values.standard || null,
+      surface_finish: values.surface_finish || null,
+      delivery_format: values.delivery_format || null,
+      processing_requirements: processing,
+      field_status: fieldStatus,
+      flagged_field_count: Object.values(fieldStatus).filter((s) => s !== "auto").length,
+      status: spec!.status,
+    };
+  }
+
+  const [savingDraft, setSavingDraft] = useState(false);
+  async function handleSaveDraft() {
+    setSavingDraft(true);
+    try {
+      dispatch({ type: "SET_SPEC_CARD", rfq_id: rfqId, spec_card: buildUpdatedSpec() });
+    } finally {
+      setTimeout(() => setSavingDraft(false), 400);
+    }
+  }
+
   async function handleConfirm() {
+
     if (blankFields.length > 0) return;
     setSubmitting(true);
     setError(null);
@@ -163,23 +193,9 @@ export function SpecCardReview({ rfqId }: Props) {
         confirmed_by: repName,
         confirmed_at: new Date().toISOString(),
       };
-      const updatedSpec: SpecCard = {
-        ...spec!,
-        grade: confirmed.grade,
-        thickness_mm: confirmed.thickness_mm,
-        thickness_tolerance: confirmed.thickness_tolerance,
-        width_mm: confirmed.width_mm,
-        coating: confirmed.coating,
-        quantity_tonnes: confirmed.quantity_tonnes,
-        standard: confirmed.standard,
-        surface_finish: values.surface_finish || spec!.surface_finish,
-        delivery_format: confirmed.delivery_format,
-        processing_requirements: processing,
-        field_status: fieldStatus,
-        flagged_field_count: Object.values(fieldStatus).filter((s) => s !== "auto").length,
-        status: "confirmed",
-      };
+      const updatedSpec: SpecCard = { ...buildUpdatedSpec(), status: "confirmed" };
       dispatch({ type: "SET_SPEC_CARD", rfq_id: rfqId, spec_card: updatedSpec });
+
       logAuditEvent({
         event_type: "spec_confirmed",
         rfq_id: rfqId,
@@ -412,9 +428,10 @@ export function SpecCardReview({ rfqId }: Props) {
               />
             </div>
             <div className="flex items-center gap-3">
-              <Button type="button" variant="outline" disabled={submitting}>
-                Save Draft
+              <Button type="button" variant="outline" disabled={submitting || savingDraft} onClick={handleSaveDraft}>
+                {savingDraft ? "Saved ✓" : "Save Draft"}
               </Button>
+
               <Tooltip>
                 <TooltipTrigger asChild>
                   <span tabIndex={-1}>
