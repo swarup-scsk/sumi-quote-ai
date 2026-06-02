@@ -248,6 +248,21 @@ export function AppProvider({ children }: { children: ReactNode }) {
           baseDispatch(action);
           break;
         }
+        case "MARK_QUOTE_SHARED": {
+          const current = stateRef.current.rfqList.find((r) => r.rfq_id === action.rfq_id);
+          if (current) {
+            const updated = appendLog(
+              current,
+              "Quote shared",
+              userEmail,
+              userId,
+              current.quote?.quote_id,
+            );
+            baseDispatch({ type: "UPDATE_RFQ", rfq_id: action.rfq_id, patch: { activity_log: updated.activity_log } });
+          }
+          baseDispatch(action);
+          break;
+        }
         default:
           baseDispatch(action);
       }
