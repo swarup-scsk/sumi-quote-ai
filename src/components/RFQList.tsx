@@ -23,7 +23,8 @@ function StatusBadge({ status }: { status: RFQInboxItem["status"] }) {
     processing: { label: "Processing", cls: "bg-amber/15 text-amber", spin: true },
     pending_review: { label: "Pending Review", cls: "bg-amber/15 text-amber" },
     confirmed: { label: "Confirmed", cls: "bg-brand/15 text-brand-dark" },
-    quoted: { label: "Quoted", cls: "bg-brand-dark text-white" },
+    quote_generated: { label: "Quote Generated", cls: "bg-brand/15 text-brand-dark" },
+    quote_shared: { label: "Quote Shared", cls: "bg-brand-dark text-white" },
     error: { label: "Error", cls: "bg-coral/15 text-coral" },
   };
   const s = map[status];
