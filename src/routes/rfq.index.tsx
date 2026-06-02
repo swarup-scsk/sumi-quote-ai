@@ -25,7 +25,7 @@ function formatTime(iso: string) {
 function RfqIndexPage() {
   const { state } = useApp();
   const drafts = state.rfqList
-    .filter((r) => r.status === "pending_review" || r.status === "confirmed")
+    .filter((r) => r.status === "pending_review")
     .sort((a, b) => new Date(b.received_at).getTime() - new Date(a.received_at).getTime());
 
   if (drafts.length === 0) {
