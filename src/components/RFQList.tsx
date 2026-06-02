@@ -268,10 +268,12 @@ export function RFQList({ items }: { items: RFQInboxItem[] }) {
               const showConfidence =
                 item.status === "pending_review" ||
                 item.status === "confirmed" ||
-                item.status === "quoted";
+                item.status === "quote_generated" ||
+                item.status === "quote_shared";
               const canReview =
                 item.status === "pending_review" || item.status === "confirmed";
-              const canViewQuote = item.status === "quoted";
+              const canViewQuote =
+                item.status === "quote_generated" || item.status === "quote_shared";
               const isOpen = !!expanded[item.rfq_id];
 
               return (
