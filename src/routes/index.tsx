@@ -15,6 +15,7 @@ export const Route = createFileRoute("/")({
 
 function InboxPage() {
   const { state } = useApp();
+  const visibleItems = state.rfqList.filter((r) => r.status !== "processing");
   return (
     <div className="mx-auto max-w-6xl space-y-6 p-6">
       <div>
@@ -24,7 +25,7 @@ function InboxPage() {
         </p>
       </div>
       <RFQUpload />
-      <RFQList items={state.rfqList} />
+      <RFQList items={visibleItems} />
     </div>
   );
 }
