@@ -118,7 +118,7 @@ type RFQRow = {
   subject: string;
   filename: string;
   received_at: string;
-  status: RFQInboxItem["status"];
+  status: RFQInboxItem["status"] | "quoted";
   overall_confidence: number | null;
   flagged_field_count: number | null;
   spec_card: SpecCard | null;
@@ -127,6 +127,11 @@ type RFQRow = {
   activity_log: ActivityLogEntry[] | null;
 };
 
+function normalizeStatus(s: RFQInboxItem["status"] | "quoted"): RFQInboxItem["status"] {
+  // Legacy DB rows used "quoted" — treat as quote_generated for backward compat.
+  return s === "quoted" ? "quote_generated" : s;
+}
+
 function rowToItem(r: RFQRow): RFQInboxItem {
   return {
     rfq_id: r.rfq_id,
@@ -134,7 +139,7 @@ function rowToItem(r: RFQRow): RFQInboxItem {
     subject: r.subject,
     filename: r.filename,
     received_at: r.received_at,
-    status: r.status,
+    status: normalizeStatus(r.status),
     overall_confidence: r.overall_confidence ?? undefined,
     flagged_field_count: r.flagged_field_count ?? undefined,
     spec_card: r.spec_card ?? undefined,
