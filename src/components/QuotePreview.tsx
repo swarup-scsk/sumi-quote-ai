@@ -31,7 +31,7 @@ function fmtDate(iso: string) {
 }
 
 export function QuotePreview({ rfqId }: Props) {
-  const { state } = useApp();
+  const { state, dispatch } = useApp();
   const rfq = state.rfqList.find((r) => r.rfq_id === rfqId);
   const quote = rfq?.quote;
 
