@@ -23,7 +23,8 @@ function StatusBadge({ status }: { status: RFQInboxItem["status"] }) {
     processing: { label: "Processing", cls: "bg-amber/15 text-amber", spin: true },
     pending_review: { label: "Pending Review", cls: "bg-amber/15 text-amber" },
     confirmed: { label: "Confirmed", cls: "bg-brand/15 text-brand-dark" },
-    quoted: { label: "Quoted", cls: "bg-brand-dark text-white" },
+    quote_generated: { label: "Quote Generated", cls: "bg-brand/15 text-brand-dark" },
+    quote_shared: { label: "Quote Shared", cls: "bg-brand-dark text-white" },
     error: { label: "Error", cls: "bg-coral/15 text-coral" },
   };
   const s = map[status];
@@ -136,7 +137,7 @@ function buildEvents(item: RFQInboxItem): TrailEvent[] {
         icon: FileSearch,
         tone: (sc.flagged_field_count ?? 0) > 0 ? "amber" : "brand",
       });
-      if (sc.status === "confirmed" || sc.status === "quoted") {
+      if (sc.status === "confirmed" || sc.status === "quote_generated" || sc.status === "quote_shared") {
         events.push({
           ts: sc.extracted_at,
           label: "Spec confirmed",
@@ -267,10 +268,12 @@ export function RFQList({ items }: { items: RFQInboxItem[] }) {
               const showConfidence =
                 item.status === "pending_review" ||
                 item.status === "confirmed" ||
-                item.status === "quoted";
+                item.status === "quote_generated" ||
+                item.status === "quote_shared";
               const canReview =
                 item.status === "pending_review" || item.status === "confirmed";
-              const canViewQuote = item.status === "quoted";
+              const canViewQuote =
+                item.status === "quote_generated" || item.status === "quote_shared";
               const isOpen = !!expanded[item.rfq_id];
 
               return (

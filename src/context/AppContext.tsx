@@ -18,6 +18,7 @@ type Action =
   | { type: "UPDATE_RFQ"; rfq_id: string; patch: Partial<RFQInboxItem> }
   | { type: "SET_SPEC_CARD"; rfq_id: string; spec_card: SpecCard }
   | { type: "SET_QUOTE"; rfq_id: string; quote: Quote }
+  | { type: "MARK_QUOTE_SHARED"; rfq_id: string }
   | { type: "REMOVE_RFQ"; rfq_id: string }
   | { type: "SET_SETTINGS"; settings: AppSettings }
   | { type: "REPLACE_RFQS"; rfqs: RFQInboxItem[] }
@@ -84,7 +85,14 @@ function reducer(state: State, action: Action): State {
       return {
         ...state,
         rfqList: state.rfqList.map((r) =>
-          r.rfq_id === action.rfq_id ? { ...r, quote: action.quote, status: "quoted" } : r,
+          r.rfq_id === action.rfq_id ? { ...r, quote: action.quote, status: "quote_generated" } : r,
+        ),
+      };
+    case "MARK_QUOTE_SHARED":
+      return {
+        ...state,
+        rfqList: state.rfqList.map((r) =>
+          r.rfq_id === action.rfq_id ? { ...r, status: "quote_shared" } : r,
         ),
       };
     case "REMOVE_RFQ":
@@ -110,7 +118,7 @@ type RFQRow = {
   subject: string;
   filename: string;
   received_at: string;
-  status: RFQInboxItem["status"];
+  status: RFQInboxItem["status"] | "quoted";
   overall_confidence: number | null;
   flagged_field_count: number | null;
   spec_card: SpecCard | null;
@@ -119,6 +127,11 @@ type RFQRow = {
   activity_log: ActivityLogEntry[] | null;
 };
 
+function normalizeStatus(s: RFQInboxItem["status"] | "quoted"): RFQInboxItem["status"] {
+  // Legacy DB rows used "quoted" — treat as quote_generated for backward compat.
+  return s === "quoted" ? "quote_generated" : s;
+}
+
 function rowToItem(r: RFQRow): RFQInboxItem {
   return {
     rfq_id: r.rfq_id,
@@ -126,7 +139,7 @@ function rowToItem(r: RFQRow): RFQInboxItem {
     subject: r.subject,
     filename: r.filename,
     received_at: r.received_at,
-    status: r.status,
+    status: normalizeStatus(r.status),
     overall_confidence: r.overall_confidence ?? undefined,
     flagged_field_count: r.flagged_field_count ?? undefined,
     spec_card: r.spec_card ?? undefined,
@@ -161,7 +174,8 @@ async function persistAction(action: Action, getItem: (id: string) => RFQInboxIt
         break;
       case "UPDATE_RFQ":
       case "SET_SPEC_CARD":
-      case "SET_QUOTE": {
+      case "SET_QUOTE":
+      case "MARK_QUOTE_SHARED": {
         const id = "rfq_id" in action ? action.rfq_id : "";
         const next = getItem(id);
         if (next) await supabase.from("rfqs").upsert(itemToRow(next), { onConflict: "rfq_id" });
@@ -228,6 +242,21 @@ export function AppProvider({ children }: { children: ReactNode }) {
               userEmail,
               userId,
               `${action.quote.quote_id} · €${action.quote.pricing_breakdown.quote_value_eur.toLocaleString()}`,
+            );
+            baseDispatch({ type: "UPDATE_RFQ", rfq_id: action.rfq_id, patch: { activity_log: updated.activity_log } });
+          }
+          baseDispatch(action);
+          break;
+        }
+        case "MARK_QUOTE_SHARED": {
+          const current = stateRef.current.rfqList.find((r) => r.rfq_id === action.rfq_id);
+          if (current) {
+            const updated = appendLog(
+              current,
+              "Quote shared",
+              userEmail,
+              userId,
+              current.quote?.quote_id,
             );
             baseDispatch({ type: "UPDATE_RFQ", rfq_id: action.rfq_id, patch: { activity_log: updated.activity_log } });
           }
