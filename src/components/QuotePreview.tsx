@@ -119,6 +119,7 @@ export function QuotePreview({ rfqId }: Props) {
       customer_name: quote!.customer_name,
       quote_value_eur: quote!.pricing_breakdown.quote_value_eur,
     });
+    dispatch({ type: "MARK_QUOTE_SHARED", rfq_id: rfqId });
     toast.success("Quote PDF downloaded — attach it in your email draft", { duration: 4000 });
   }
 
