@@ -85,7 +85,14 @@ function reducer(state: State, action: Action): State {
       return {
         ...state,
         rfqList: state.rfqList.map((r) =>
-          r.rfq_id === action.rfq_id ? { ...r, quote: action.quote, status: "quoted" } : r,
+          r.rfq_id === action.rfq_id ? { ...r, quote: action.quote, status: "quote_generated" } : r,
+        ),
+      };
+    case "MARK_QUOTE_SHARED":
+      return {
+        ...state,
+        rfqList: state.rfqList.map((r) =>
+          r.rfq_id === action.rfq_id ? { ...r, status: "quote_shared" } : r,
         ),
       };
     case "REMOVE_RFQ":
