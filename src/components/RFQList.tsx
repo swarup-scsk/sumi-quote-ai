@@ -137,7 +137,7 @@ function buildEvents(item: RFQInboxItem): TrailEvent[] {
         icon: FileSearch,
         tone: (sc.flagged_field_count ?? 0) > 0 ? "amber" : "brand",
       });
-      if (sc.status === "confirmed" || sc.status === "quoted") {
+      if (sc.status === "confirmed" || sc.status === "quote_generated" || sc.status === "quote_shared") {
         events.push({
           ts: sc.extracted_at,
           label: "Spec confirmed",
