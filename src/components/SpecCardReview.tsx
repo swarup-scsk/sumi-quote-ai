@@ -331,6 +331,7 @@ export function SpecCardReview({ rfqId }: Props) {
             {(["Spot", "Contract", "Strategic"] as CustomerTier[]).map((t) => (
               <button
                 key={t}
+                type="button"
                 onClick={() => setTier(t)}
                 className={cn(
                   "px-4 py-1.5 text-sm font-medium rounded transition-colors",
