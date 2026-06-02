@@ -174,7 +174,8 @@ async function persistAction(action: Action, getItem: (id: string) => RFQInboxIt
         break;
       case "UPDATE_RFQ":
       case "SET_SPEC_CARD":
-      case "SET_QUOTE": {
+      case "SET_QUOTE":
+      case "MARK_QUOTE_SHARED": {
         const id = "rfq_id" in action ? action.rfq_id : "";
         const next = getItem(id);
         if (next) await supabase.from("rfqs").upsert(itemToRow(next), { onConflict: "rfq_id" });
