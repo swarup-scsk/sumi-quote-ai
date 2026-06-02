@@ -163,6 +163,23 @@ export function SpecCardReview({ rfqId }: Props) {
         confirmed_by: repName,
         confirmed_at: new Date().toISOString(),
       };
+      const updatedSpec: SpecCard = {
+        ...spec!,
+        grade: confirmed.grade,
+        thickness_mm: confirmed.thickness_mm,
+        thickness_tolerance: confirmed.thickness_tolerance,
+        width_mm: confirmed.width_mm,
+        coating: confirmed.coating,
+        quantity_tonnes: confirmed.quantity_tonnes,
+        standard: confirmed.standard,
+        surface_finish: values.surface_finish || spec!.surface_finish,
+        delivery_format: confirmed.delivery_format,
+        processing_requirements: processing,
+        field_status: fieldStatus,
+        flagged_field_count: Object.values(fieldStatus).filter((s) => s !== "auto").length,
+        status: "confirmed",
+      };
+      dispatch({ type: "SET_SPEC_CARD", rfq_id: rfqId, spec_card: updatedSpec });
       logAuditEvent({
         event_type: "spec_confirmed",
         rfq_id: rfqId,
@@ -170,6 +187,7 @@ export function SpecCardReview({ rfqId }: Props) {
         user_id: repName,
       });
       const quote = await generateQuote(confirmed);
+
       dispatch({ type: "SET_QUOTE", rfq_id: rfqId, quote });
       logAuditEvent({
         event_type: "quote_generated",
