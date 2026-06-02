@@ -18,6 +18,7 @@ type Action =
   | { type: "UPDATE_RFQ"; rfq_id: string; patch: Partial<RFQInboxItem> }
   | { type: "SET_SPEC_CARD"; rfq_id: string; spec_card: SpecCard }
   | { type: "SET_QUOTE"; rfq_id: string; quote: Quote }
+  | { type: "MARK_QUOTE_SHARED"; rfq_id: string }
   | { type: "REMOVE_RFQ"; rfq_id: string }
   | { type: "SET_SETTINGS"; settings: AppSettings }
   | { type: "REPLACE_RFQS"; rfqs: RFQInboxItem[] }
