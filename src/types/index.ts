@@ -19,7 +19,7 @@ export interface SpecCard {
   filename: string;
   received_at: string;       // ISO 8601
   extracted_at: string;      // ISO 8601
-  status: "pending_review" | "confirmed" | "quoted";
+  status: "pending_review" | "confirmed" | "quote_generated" | "quote_shared";
 
   // Extracted spec fields + confidence scores
   grade: string | null;
