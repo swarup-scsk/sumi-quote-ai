@@ -142,7 +142,37 @@ export function SpecCardReview({ rfqId }: Props) {
     });
   }
 
+  function buildUpdatedSpec(): SpecCard {
+    return {
+      ...spec!,
+      grade: values.grade || null,
+      thickness_mm: values.thickness_mm ? Number(values.thickness_mm) : null,
+      thickness_tolerance: values.thickness_tolerance || null,
+      width_mm: values.width_mm ? Number(values.width_mm) : null,
+      coating: values.coating || null,
+      quantity_tonnes: values.quantity_tonnes ? Number(values.quantity_tonnes) : null,
+      standard: values.standard || null,
+      surface_finish: values.surface_finish || null,
+      delivery_format: values.delivery_format || null,
+      processing_requirements: processing,
+      field_status: fieldStatus,
+      flagged_field_count: Object.values(fieldStatus).filter((s) => s !== "auto").length,
+      status: spec!.status,
+    };
+  }
+
+  const [savingDraft, setSavingDraft] = useState(false);
+  async function handleSaveDraft() {
+    setSavingDraft(true);
+    try {
+      dispatch({ type: "SET_SPEC_CARD", rfq_id: rfqId, spec_card: buildUpdatedSpec() });
+    } finally {
+      setTimeout(() => setSavingDraft(false), 400);
+    }
+  }
+
   async function handleConfirm() {
+
     if (blankFields.length > 0) return;
     setSubmitting(true);
     setError(null);
